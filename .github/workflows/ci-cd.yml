@@ -1,0 +1,81 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      # Usa o Docker Compose para subir todos os serviços necessários
+      docker:
+        image: docker:20.10.14
+        options: --privileged
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Start services with Docker Compose
+      run: |
+        docker-compose up -d
+        echo "Aguardando os serviços iniciarem..."
+        sleep 30  # Dá tempo para os containers ficarem prontos
+
+    - name: Reset Kibana System Password
+      run: |
+        echo "Redefinindo a senha do usuário kibana_system..."
+        docker-compose exec -T elasticsearch bash -c \
+          "bin/elasticsearch-reset-password -u kibana_system --batch" | tee reset-password.log
+        export KIBANA_PASSWORD=$(grep 'New password for user' reset-password.log | awk '{print $NF}')
+        echo "KIBANA_PASSWORD=$KIBANA_PASSWORD" >> $GITHUB_ENV
+
+    - name: Verify Elasticsearch Health
+      run: |
+        echo "Verificando saúde do Elasticsearch..."
+        curl -u "elastic:elastic_password_123" http://localhost:9200/_cluster/health?pretty
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Generate Prisma client
+      run: npx prisma generate
+
+    - name: Run migrations
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/user_management
+      run: npx prisma migrate deploy
+
+    - name: Run tests
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/user_management
+        ELASTICSEARCH_NODE: http://localhost:9200
+        ELASTICSEARCH_USERNAME: elastic
+        ELASTICSEARCH_PASSWORD: elastic_password_123
+      run: npm run test
+
+    - name: Update Kibana Config with New Password
+      run: |
+        echo "Configurando Kibana para usar a nova senha..."
+        sed -i "s/ELASTICSEARCH_PASSWORD=.*/ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}/" docker-compose.yml
+
+    - name: Build application
+      run: npm run build
+
+    - name: Stop and Clean Up
+      if: always()
+      run: docker-compose down

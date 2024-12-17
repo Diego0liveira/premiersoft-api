@@ -1,0 +1,17 @@
+{
+  "USER": {
+    "NOT_FOUND": "Usuário não encontrado",
+    "INVALID_PASSWORD": "Senha inválida",
+    "EMAIL_ALREADY_IN_USE": "Email já está em uso",
+    "INVALID_EMAIL": "Email inválido",
+    "INVALID_USER": "Usuário inválido",
+    "USER_DISABLED": "Usuário desativado",
+    "TOO_MANY_REQUESTS": "Muitas solicitações",
+    "OPERATION_NOT_ALLOWED": "Operação não permitida",
+    "INVALID_ROLE": "Função inválida",
+    "NAME_REQUIRED": "Nome é obrigatório",
+    "EMAIL_REQUIRED": "Email é obrigatório",
+    "ROLE_REQUIRED": "Função é obrigatória",
+    "EMAIL_EXISTS": "Email já existe"
+  }
+}

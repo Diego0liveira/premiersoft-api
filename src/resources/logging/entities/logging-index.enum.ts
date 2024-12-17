@@ -1,0 +1,15 @@
+export enum LoggingIndex {
+	USER_CREATED = 'user-creation',
+	USER_UPDATED = 'user-update',
+	USER_DELETED = 'user-deletion',
+	USER_FETCHED = 'user-fetch',
+	USER_FILTERED = 'user-filter',
+	USER_NOT_FOUND = 'user-not-found',
+	USER_UPDATE_FAILED = 'user-update-failed',
+	USER_FILTER_FAILED = 'user-filter-failed',
+	USER_DELETION_FAILED = 'user-deletion-failed',
+	USER_CREATION_FAILED = 'user-creation-failed',
+	API_REQUEST = 'api-request',
+	TEST = 'test',
+	ERROR = 'error',
+}

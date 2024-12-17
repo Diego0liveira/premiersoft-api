@@ -1,0 +1,28 @@
+<mxfile host="65bd71144e">
+    <diagram name="Data Flow Diagram" id="0">
+        <mxGraphModel dx="1273" dy="978" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="client_request" value="Client Request" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="10" y="40" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="api_layer" value="API Layer" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="150" y="40" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="service_layer" value="Service Layer" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="40" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="database" value="Database" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="470" y="40" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="cache" value="Redis Cache" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="470" y="120" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="response" value="Response to Client" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="310" y="140" width="120" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

@@ -1,0 +1,17 @@
+{
+  "USER": {
+    "NOT_FOUND": "User not found",
+    "INVALID_PASSWORD": "Invalid password",
+    "EMAIL_ALREADY_IN_USE": "Email already in use",
+    "INVALID_EMAIL": "Invalid email",
+    "INVALID_USER": "Invalid user",
+    "USER_DISABLED": "User disabled",
+    "TOO_MANY_REQUESTS": "Too many requests",
+    "OPERATION_NOT_ALLOWED": "Operation not allowed",
+    "INVALID_ROLE": "Invalid role",
+    "NAME_REQUIRED": "Name is required",
+    "EMAIL_REQUIRED": "Email is required",
+    "ROLE_REQUIRED": "Role is required",
+    "EMAIL_EXISTS": "Email already exists"
+  }
+}
