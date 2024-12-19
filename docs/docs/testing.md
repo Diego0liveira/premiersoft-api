@@ -1,138 +1,116 @@
-# Estratégia de Testes do Microsserviço
+# Estratégia de Testes
 
-## Visão Geral
-
-A estratégia de testes para o microsserviço é projetada para garantir que ele funcione de forma confiável, mantenha altos padrões de qualidade e atenda aos requisitos de desempenho. Esta abordagem cobre testes unitários, de integração, e de carga, abordando todas as partes críticas do sistema.
+## Introdução
+Este documento descreve a abordagem e a estratégia de testes para garantir a qualidade e a confiabilidade da aplicação. A implementação de testes automatizados, juntamente com revisões manuais, visa cobrir todos os aspectos funcionais e não funcionais do sistema.
 
 ---
 
 ## Tipos de Testes
 
-### 1. Testes Unitários
+### 1. **Testes Unitários**
+Garantem que funções, métodos e componentes individuais funcionem como esperado.
+- **Ferramenta utilizada**: Jest
+- **Cobertura esperada**: 80% ou mais para módulos principais.
 
-**Objetivo:** Validar a funcionalidade isolada de componentes individuais, como métodos ou classes.
+#### Exemplos de Módulos Testados:
+- Controladores (ex.: `user.controller.ts`)
+- Serviços (ex.: `user.service.ts`)
+- Validadores
 
-- **Ferramentas:** Jest, Mocha ou Jasmine.
-- **Componentes Testados:**
-  - Validação de entrada (ex.: JSON Schema).
-  - Lógica de negócios na camada de serviço.
-  - Manipulação de respostas na camada de API.
-
-**Exemplo:**
-
-```javascript
-describe('POST /data validation', () => {
-  it('should return 400 for invalid input', async () => {
-    const response = await request(app)
-      .post('/data')
-      .send({ invalidField: 'value' });
-
-    expect(response.status).toBe(400);
-    expect(response.body.error).toBe('Invalid input');
-  });
-});
+#### Exemplo de Comando:
+```bash
+npm run test:unit
 ```
 
-### 2. Testes de Integração
+### 2. **Testes de Integração**
+Verificam a interação entre diferentes módulos e serviços, como banco de dados, Kafka e Redis.
+- **Ferramentas utilizadas**: Jest e Testcontainers.
+- **Foco**: Testar comunicação entre componentes (ex.: Prisma e PostgreSQL, consumidores Kafka).
 
-**Objetivo:** Garantir que os diferentes componentes do microsserviço interajam corretamente.
-
-- **Ferramentas:** Supertest (para APIs) e Docker Compose (para testes com dependências como Redis ou PostgreSQL).
-- **Componentes Testados:**
-  - Integração entre a camada de serviço e o banco de dados.
-  - Fluxo completo entre endpoints.
-
-**Exemplo:**
-
-```javascript
-describe('GET /data', () => {
-  it('should return stored data', async () => {
-    const mockData = { id: 1, name: 'Test Data' };
-    await database.insert(mockData);
-
-    const response = await request(app).get('/data');
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual([mockData]);
-  });
-});
+#### Exemplo de Comando:
+```bash
+npm run test:integration
 ```
 
-### 3. Testes de Carga
+### 3. **Testes de API (End-to-End)**
+Valida a funcionalidade completa da aplicação a partir do ponto de vista do usuário.
+- **Ferramentas utilizadas**: Supertest e Postman.
+- **Cenários Cobertos**:
+  - CRUD de usuários.
+  - Processamento de mensagens Kafka.
+  - Respostas de monitoramento do sistema.
 
-**Objetivo:** Avaliar o desempenho sob diferentes cargas de trabalho.
+#### Exemplo de Comando:
+```bash
+npm run test:e2e
+```
 
-- **Ferramentas:** Apache JMeter, k6 ou Locust.
-- **Metas:**
-  - Tempo de resposta < 500ms para 95% das requisições.
-  - Suporte para até 1 milhão de registros sem degradação significativa (> 10%).
+### 4. **Testes de Carga**
+Avaliam o desempenho da aplicação sob alta carga e verificam limites de escalabilidade.
+- **Ferramentas utilizadas**: K6 ou Locust.
+- **Foco**:
+  - Avaliar o comportamento sob milhares de requisições simultâneas.
+  - Garantir que o escalonamento automático funcione corretamente.
 
-**Exemplo de Script k6:**
-
-```javascript
-import http from 'k6/http';
-import { check } from 'k6';
-
-export let options = {
-  stages: [
-    { duration: '30s', target: 100 }, // ramp-up
-    { duration: '1m', target: 100 }, // steady state
-    { duration: '30s', target: 0 }, // ramp-down
-  ],
-};
-
-export default function () {
-  let res = http.get('http://localhost:8080/data');
-  check(res, {
-    'status is 200': (r) => r.status === 200,
-    'response time < 500ms': (r) => r.timings.duration < 500,
-  });
-}
+#### Exemplo de Execução:
+```bash
+k6 run load-test.js
 ```
 
 ---
 
-## Estratégia de Cobertura de Testes
+## Estrutura de Testes
 
-- **Meta de Cobertura:** 90% dos caminhos críticos.
-- **Prioridade:**
-  1. Validação de entradas e lógica de negócios.
-  2. Integrações entre componentes (ex.: API e banco de dados).
-  3. Comportamento em condições de carga.
+A estrutura de testes do projeto está organizada da seguinte forma:
 
----
-
-## Automação e CI/CD
-
-Os testes são integrados ao pipeline CI/CD para execução automatizada em cada mudança de código.
-
-1. **Pipeline:**
-
-   - **Etapa 1:** Executar testes unitários.
-   - **Etapa 2:** Executar testes de integração com dependências em contêineres Docker.
-   - **Etapa 3:** Executar testes de carga em ambientes de staging.
-
-2. **Ferramentas:**
-   - GitHub Actions ou Jenkins.
-   - Relatórios automatizados com cobertura de código.
+```
+src/
+├── __tests__/                # Testes gerais
+│   ├── unit/                # Testes unitários
+│   ├── integration/         # Testes de integração
+│   ├── e2e/                 # Testes end-to-end
+│   └── mocks/               # Mocks e fixtures
+├── utils/                   # Utilitários de suporte para testes
+```
 
 ---
 
-## Plano de Testes Futuros
+## Integração Contínua
+Os testes estão integrados ao pipeline de CI/CD para garantir a validação automática em cada alteração no código.
 
-1. **Testes de Segurança:**
+### Pipeline de Testes
+1. **Etapa de Build**:
+   - Verifica se o código compila corretamente.
 
-   - Validar autenticação e autorização (ex.: OWASP Top 10).
-   - Realizar testes de penetração automatizados.
+2. **Execução de Testes Unitários**:
+   - Garante a funcionalidade básica dos módulos.
 
-2. **Testes de Resiliência:**
+3. **Execução de Testes de Integração**:
+   - Valida a comunicação entre serviços.
 
-   - Simular falhas no banco de dados ou em outras dependências.
+4. **Testes End-to-End**:
+   - Garante que as APIs principais estão funcionando conforme esperado.
 
-3. **Testes de Compatibilidade:**
-   - Validar o comportamento em diferentes ambientes (ex.: versões do Node.js).
+### Ferramenta: GitHub Actions
+O pipeline de testes está configurado em `.github/workflows/test.yml`.
 
 ---
 
-## Considerações Finais
+## Métricas de Qualidade
 
-Uma estratégia abrangente de testes cobre todos os aspectos críticos do microsserviço, desde a funcionalidade básica até o desempenho sob carga. A automação no pipeline CI/CD garante que mudanças futuras sejam validadas continuamente.
+### 1. **Cobertura de Código**
+A cobertura de testes é monitorada com ferramentas como Jest e reportada automaticamente.
+
+- **Meta**: 80% ou mais para módulos principais.
+
+### 2. **Tempo de Resposta**
+Os testes de desempenho avaliam o tempo médio de resposta sob diferentes cargas:
+- **Meta**: Menos de 500ms para 95% das requisições.
+
+### 3. **Conformidade Funcional**
+Os resultados dos testes garantem que todas as funcionalidades definidas estejam de acordo com os requisitos.
+
+---
+
+## Conclusão
+A estratégia de testes descrita neste documento garante a qualidade da aplicação em todos os aspectos críticos, desde a funcionalidade até o desempenho. A adoção de ferramentas modernas e a integração com o pipeline CI/CD proporcionam um fluxo de desenvolvimento confiável e eficiente.

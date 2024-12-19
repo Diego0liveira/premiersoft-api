@@ -1,31 +1,65 @@
-<mxfile host="65bd71144e">
-    <diagram name="Deployment Diagram" id="0">
-        <mxGraphModel dx="1273" dy="978" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
-            <root>
-                <mxCell id="0"/>
-                <mxCell id="1" parent="0"/>
-                <mxCell id="client" value="Client" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#DAE8FC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="10" y="100" width="120" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="load_balancer" value="Load Balancer" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#DAE8FC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="160" y="100" width="120" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="k8s_pod1" value="Pod 1" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#D5E8D4;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="310" y="40" width="100" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="k8s_pod2" value="Pod 2" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#D5E8D4;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="310" y="120" width="100" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="k8s_pod3" value="Pod 3" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#D5E8D4;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="310" y="200" width="100" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="database" value="PostgreSQL" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="450" y="100" width="120" height="60" as="geometry"/>
-                </mxCell>
-                <mxCell id="redis" value="Redis Cache" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="450" y="200" width="120" height="60" as="geometry"/>
-                </mxCell>
-            </root>
-        </mxGraphModel>
-    </diagram>
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile>
+  <diagram name="Deployment">
+    <mxGraphModel dx="2000" dy="2000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" shadow="0" math="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Load Balancer -->
+        <mxCell id="load-balancer" value="Load Balancer" style="shape=hexagon;fillColor=#AED6F1;strokeColor=#1F618D;" vertex="1" parent="1">
+          <mxGeometry x="400" y="50" width="150" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Application Servers -->
+        <mxCell id="app-server-1" value="App Server 1" style="shape=rectangle;fillColor=#D5DBDB;strokeColor=#2C3E50;" vertex="1" parent="1">
+          <mxGeometry x="300" y="200" width="150" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="app-server-2" value="App Server 2" style="shape=rectangle;fillColor=#D5DBDB;strokeColor=#2C3E50;" vertex="1" parent="1">
+          <mxGeometry x="500" y="200" width="150" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Database Cluster -->
+        <mxCell id="db-cluster" value="Database Cluster" style="shape=cylinder;fillColor=#D6EAF8;strokeColor=#3498DB;" vertex="1" parent="1">
+          <mxGeometry x="400" y="400" width="150" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Cache Cluster -->
+        <mxCell id="cache-cluster" value="Cache Cluster" style="shape=ellipse;fillColor=#FAD7A0;strokeColor=#D35400;" vertex="1" parent="1">
+          <mxGeometry x="600" y="400" width="150" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Kafka Cluster -->
+        <mxCell id="kafka-cluster" value="Kafka Cluster" style="shape=hexagon;fillColor=#A9DFBF;strokeColor=#28B463;" vertex="1" parent="1">
+          <mxGeometry x="200" y="400" width="150" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Connections -->
+        <mxCell id="arrow1" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" edge="1" parent="1" source="load-balancer" target="app-server-1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow2" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" edge="1" parent="1" source="load-balancer" target="app-server-2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow3" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" edge="1" parent="1" source="app-server-1" target="db-cluster">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow4" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" edge="1" parent="1" source="app-server-2" target="db-cluster">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow5" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" edge="1" parent="1" source="app-server-1" target="cache-cluster">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow6" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" edge="1" parent="1" source="app-server-2" target="cache-cluster">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow7" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" edge="1" parent="1" source="app-server-1" target="kafka-cluster">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow8" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" edge="1" parent="1" source="app-server-2" target="kafka-cluster">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
 </mxfile>

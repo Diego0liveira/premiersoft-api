@@ -45,4 +45,4 @@ RUN npm install --only=production
 EXPOSE 3000
 
 # Esperar os serviços e iniciar a aplicação
-CMD ["sh", "-c", "sleep 10 && npx prisma migrate deploy && node dist/main"]
+CMD ["sh", "-c", "sleep 10 && npx prisma migrate deploy && node dist/main && node dist/microservice.js"]

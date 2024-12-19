@@ -1,185 +1,115 @@
-# Estratégia de Implantação do Microsserviço
+
+# Implantação
 
 ## Visão Geral
-
-Este documento descreve a estratégia de implantação do microsserviço, abrangendo a conteinerização com Docker, orquestração com Kubernetes e configurações específicas para escalabilidade e alta disponibilidade.
+Este documento descreve o processo de implantação da aplicação, incluindo containerização, orquestração e configuração de serviços de suporte como Kafka, Redis e PostgreSQL.
 
 ---
 
-## Conteinerização com Docker
+## Pré-requisitos
 
-### Dockerfile
+1. **Docker**: Certifique-se de que o Docker está instalado e em execução.
+2. **Docker Compose**: Necessário para orquestração local de containers.
+3. **Kubernetes (opcional)**: Para implantações em nível de produção.
+4. **Variáveis de Ambiente**: Defina as variáveis necessárias em um arquivo `.env`.
 
-O `Dockerfile` utilizado no projeto foi projetado para criar imagens leves e seguras. Abaixo está um exemplo do conteúdo:
+---
 
-```Dockerfile
-# Imagem base
-FROM node:18-alpine
+## Implantação Local
 
-# Diretório de trabalho
-WORKDIR /app
+### Etapas:
+1. **Prepare o Ambiente**
+   Certifique-se de que o arquivo `.env` está localizado na raiz do projeto. Exemplo:
+   ```env
+   DATABASE_URL=postgresql://postgres:postgres@postgres:5432/user_management
+   REDIS_HOST=redis
+   REDIS_PORT=6379
+   ELASTICSEARCH_NODE=http://elasticsearch:9200
+   KAFKA_BROKER=localhost:9092
+   ```
 
-# Copiar arquivos do projeto
-COPY package*.json ./
-COPY src ./src
+2. **Inicie os Containers**
+   Use o Docker Compose para construir e iniciar os containers:
+   ```bash
+   docker-compose up --build
+   ```
 
-# Instalar dependências
-RUN npm install --production
+3. **Acesse os Serviços**
+   - **API**: http://localhost:3000
+   - **Microserviço**: Executa em uma porta separada (ex.: 3001).
+   - **PostgreSQL**: Porta `5432`
+   - **Redis**: Porta `6379`
+   - **Kafka**: Porta `9092`
+   - **Elasticsearch**: Porta `9200`
+   - **Kibana**: Porta `5601`
 
-# Expor a porta
-EXPOSE 8080
+---
 
-# Comando de inicialização
-CMD ["npm", "start"]
-```
+## Implantação em Produção
 
-### Build e Execução
+### Usando Kubernetes
 
-- **Build da imagem:**
-  ```bash
-  docker build -t microsservico-data .
+1. **Prepare os Manifests do Kubernetes**
+   - Os arquivos de implantação estão disponíveis em `docs/kubernetes/`:
+     - `deployment.yaml`: Define as implantações da aplicação.
+     - `service.yaml`: Expõe os serviços.
+     - `hpa.yaml`: Configura o escalonamento horizontal automático.
+
+2. **Implante no Kubernetes**
+   Aplique os manifests:
+   ```bash
+   kubectl apply -f docs/kubernetes/deployment.yaml
+   kubectl apply -f docs/kubernetes/service.yaml
+   kubectl apply -f docs/kubernetes/hpa.yaml
+   ```
+
+3. **Monitore a Implantação**
+   Verifique o status dos pods e serviços:
+   ```bash
+   kubectl get pods
+   kubectl get services
+   ```
+
+### Configuração do Ambiente
+- Use um ConfigMap para variáveis de ambiente.
+- Exemplo:
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: app-config
+  data:
+    DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/user_management"
+    REDIS_HOST: "redis"
+    REDIS_PORT: "6379"
   ```
-- **Execução do contêiner:**
+
+---
+
+## Pipeline de CI/CD
+
+### GitHub Actions
+O projeto inclui workflows de CI/CD em `.github/workflows`:
+- **Build e Testes**: Executa em cada push para validar a aplicação.
+- **Imagem Docker**: Constrói e envia imagens Docker para um registro de containers.
+
+### Visão Geral do Pipeline
+1. Construa a aplicação.
+2. Execute os testes.
+3. Construa e marque imagens Docker.
+4. Envie as imagens para o registro de containers.
+5. Implante no Kubernetes.
+
+---
+
+## Notas Adicionais
+- **Logs e Monitoramento**: Use o Kibana para visualizar logs do Elasticsearch.
+- **Escalabilidade**: Escaladores horizontais automáticos (HPA) garantem que a aplicação escale conforme a demanda.
+- **Migrações de Banco de Dados**: Use o Prisma CLI para aplicar migrações:
   ```bash
-  docker run -p 8080:8080 microsservico-data
+  npx prisma migrate deploy
   ```
-
----
-
-## Orquestração com Kubernetes
-
-### Arquivos de Manifesto
-
-Os principais componentes para a implantação no Kubernetes incluem `Deployment`, `Service` e `Horizontal Pod Autoscaler (HPA)`.
-
-#### Deployment
-
-Configura a implantação do microsserviço, garantindo a resiliência com múltiplas réplicas:
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: microsservico-deployment
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: microsservico
-  template:
-    metadata:
-      labels:
-        app: microsservico
-    spec:
-      containers:
-        - name: microsservico
-          image: microsservico-data:latest
-          ports:
-            - containerPort: 8080
-          resources:
-            requests:
-              memory: '256Mi'
-              cpu: '250m'
-            limits:
-              memory: '512Mi'
-              cpu: '500m'
-```
-
-#### Service
-
-Configura um serviço para expor o microsserviço:
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: microsservico-service
-spec:
-  selector:
-    app: microsservico
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8080
-  type: LoadBalancer
-```
-
-#### Horizontal Pod Autoscaler (HPA)
-
-Configura o escalonamento automático com base no uso de CPU:
-
-```yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: microsservico-hpa
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: microsservico-deployment
-  minReplicas: 3
-  maxReplicas: 10
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
-```
-
----
-
-## Estratégia de Monitoramento
-
-### Logs
-
-- **Ferramenta:** Elasticsearch, Fluentd e Kibana (EFK stack).
-- **Configuração:** Redirecionar logs dos contêineres para Fluentd e indexar no Elasticsearch.
-
-### Métricas
-
-- **Ferramenta:** Prometheus e Grafana.
-- **Configuração:** Expor métricas customizadas do microsserviço em `/metrics` e monitorar com Prometheus.
-
----
-
-## Instruções para Implantação
-
-1. **Configurar o cluster Kubernetes:**
-
-   ```bash
-   kubectl create namespace microsservico
-   ```
-
-2. **Aplicar os manifestos:**
-
-   ```bash
-   kubectl apply -f kubernetes/deployment.yaml
-   kubectl apply -f kubernetes/service.yaml
-   kubectl apply -f kubernetes/hpa.yaml
-   ```
-
-3. **Verificar o status dos pods:**
-
-   ```bash
-   kubectl get pods -n microsservico
-   ```
-
-4. **Obter o endpoint do serviço:**
-   ```bash
-   kubectl get service -n microsservico
-   ```
-
----
-
-## Estratégia de Escalabilidade
-
-- **Escalabilidade Horizontal:** Gerenciada pelo HPA para ajustar o número de pods.
-- **Escalabilidade Vertical:** Configurar `requests` e `limits` apropriados para os contêineres no Deployment.
-- **Caching:** Adicionar Redis como camada intermediária para melhorar o desempenho das leituras.
-
+  
 ---
 
 ## Considerações Finais

@@ -1,26 +1,44 @@
 <mxfile host="65bd71144e">
-    <diagram name="Data Flow Diagram" id="0">
-        <mxGraphModel dx="1273" dy="978" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <diagram name="Data Flow" id="0">
+        <mxGraphModel dx="1148" dy="655" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="client_request" value="Client Request" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="10" y="40" width="120" height="60" as="geometry"/>
+                <mxCell id="external-systems" value="External Systems" style="shape=ellipse;fillColor=#AED6F1;strokeColor=#1F618D;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="100" width="150" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="api_layer" value="API Layer" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="150" y="40" width="120" height="60" as="geometry"/>
+                <mxCell id="rest-api" value="REST API" style="shape=rectangle;fillColor=#D5DBDB;strokeColor=#2C3E50;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="100" width="150" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="service_layer" value="Service Layer" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="310" y="40" width="120" height="60" as="geometry"/>
+                <mxCell id="kafka-gateway" value="Kafka Gateway" style="shape=rectangle;fillColor=#A9DFBF;strokeColor=#28B463;" parent="1" vertex="1">
+                    <mxGeometry x="300" y="200" width="150" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="database" value="Database" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="470" y="40" width="120" height="60" as="geometry"/>
+                <mxCell id="backend" value="Backend Service" style="shape=rectangle;fillColor=#D5DBDB;strokeColor=#2C3E50;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="150" width="150" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="cache" value="Redis Cache" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="470" y="120" width="120" height="60" as="geometry"/>
+                <mxCell id="database" value="Database" style="shape=cylinder;fillColor=#D6EAF8;strokeColor=#3498DB;" parent="1" vertex="1">
+                    <mxGeometry x="700" y="100" width="150" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="response" value="Response to Client" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=1;fillColor=#FFF2CC;gradientColor=none;strokeColor=#000000;shadow=0;labelBackgroundColor=none;" parent="1" vertex="1">
-                    <mxGeometry x="310" y="140" width="120" height="60" as="geometry"/>
+                <mxCell id="cache" value="Cache" style="shape=ellipse;fillColor=#FAD7A0;strokeColor=#D35400;" parent="1" vertex="1">
+                    <mxGeometry x="700" y="200" width="150" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow1" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" parent="1" source="external-systems" target="rest-api" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow2" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" parent="1" source="external-systems" target="kafka-gateway" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow3" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" parent="1" source="rest-api" target="backend" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow4" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" parent="1" source="kafka-gateway" target="backend" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow5" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" parent="1" source="backend" target="database" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow6" style="edgeStyle=elbowEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;orthogonal=0;" parent="1" source="backend" target="cache" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>

@@ -1,89 +1,44 @@
-# Arquitetura do Microsserviço
 
-## Visão Geral da Arquitetura
+# Arquitetura
 
-O microsserviço segue uma arquitetura em camadas que promove separação de responsabilidades, escalabilidade e facilidade de manutenção. A arquitetura foi projetada para garantir alta disponibilidade, baixa latência e suporte para altos volumes de dados.
-
----
-
-## Camadas do Microsserviço
-
-### 1. Camada de API
-
-**Funções:**
-
-- Lidar com solicitações HTTP (POST e GET).
-- Realizar validação inicial de dados JSON usando bibliotecas como `Swagger`.
-- Enviar respostas apropriadas com códigos de status HTTP.
-
-**Tecnologias:**
-
-- **Framework:** NestJs (Node.js) - Um framework progressivo para Node.js, projetado para construir aplicações server-side eficientes, confiáveis e escaláveis.
-- **Validação:** JSON Schema (class-validator) - A seção de validação utiliza JSON Schema em conjunto com a biblioteca class-validator para garantir a conformidade dos dados..
-- **Documentação:** Swagger - Utilizado para gerar e visualizar a documentação da API de forma interativa, facilitando o entendimento e a integração com outros serviços.
+## Visão Geral
+Este projeto é uma aplicação backend construída com **NestJS** utilizando uma arquitetura modular. Ele incorpora várias funcionalidades, como APIs RESTful, microserviços Kafka, Redis para caching e Prisma ORM para gerenciamento do banco de dados. O projeto foi projetado para ser escalável, testável e implantável usando Docker e Kubernetes.
 
 ---
 
-### 2. Camada de Serviço
+## Componentes Principais
 
-**Funções:**
+### 1. **Módulos**
+A aplicação está estruturada em vários módulos, cada um com uma responsabilidade distinta:
 
-- Encapsular a lógica de negócios.
-- Realizar transformações necessárias nos dados antes de armazená-los ou retorná-los.
-- Implementar regras de validação e consistência.
+- **Módulo de Usuários**: Gerencia usuários, incluindo operações CRUD e eventos de usuários baseados em Kafka.
+- **Módulo de Logging**: Registro centralizado de atividades da aplicação.
+- **Módulo de Monitoramento**: Fornece verificações de saúde do sistema e métricas.
 
-**Tecnologias:**
+### 2. **Camada Comum**
+Componentes reutilizáveis compartilhados em toda a aplicação:
 
-- Implementado como um serviço em Node.js com arquitetura modular.
-- Dependências: `class-validator` para validação adicional e `axios` para integrações externas (se necessário).
+- **DTOs**: Objetos de transferência de dados para validação de requisições e tipagem de dados.
+- **Enums**: Enumerações para constantes compartilhadas, como tópicos Kafka e tipos de usuários.
+- **Interceptores**: Interceptores de logging e requisições para aprimorar funcionalidades.
+- **Middleware**: Middleware personalizado para inspeção de requisições.
 
----
+### 3. **Caching**
+O Redis é usado para caching, reduzindo a carga no banco de dados e melhorando os tempos de resposta. O mecanismo de caching está integrado utilizando o módulo `@nestjs/cache-manager`.
 
-### 3. Camada de Banco de Dados
+### 4. **Banco de Dados**
+O Prisma ORM é usado para gerenciar o banco de dados PostgreSQL. O esquema do banco de dados é definido em `prisma/schema.prisma`, e as migrações são aplicadas usando o CLI do Prisma.
 
-**Funções:**
-
-- Armazenar e recuperar dados JSON estruturados.
-- Garantir consistência e desempenho em alta escala.
-
-**Tecnologia Escolhida:**
-
-- **Framework:** Prisma ORM - Um ORM de próxima geração para Node.js e TypeScript que fornece um cliente de banco de dados com segurança de tipos.
-- **Banco de Dados:** PostgreSQL.
-- **Justificativa:**
-  - Suporte a JSON com campos JSONB para operações rápidas.
-  - Forte consistência transacional.
-  - Ferramentas robustas para indexação e otimização de consultas.
-
-**Alternativa:**
-
-- MongoDB para cenários com dados altamente não estruturados e consultas flexíveis.
+### 5. **Mensageria**
+O Kafka está integrado para comunicação orientada a eventos. A aplicação atua como produtora e consumidora, permitindo o processamento assíncrono de dados.
 
 ---
 
-## Fluxo de Dados
+## Decisões Arquiteturais
 
-1. **POST /data**:
-
-   - O cliente envia uma carga JSON para a API.
-   - A camada de API valida os dados e os encaminha para a camada de serviço.
-   - A camada de serviço aplica a lógica de negócios e persiste os dados no banco de dados.
-
-2. **GET /data**:
-   - A API recebe a solicitação de consulta.
-   - A camada de serviço consulta o banco de dados e aplica filtros, se necessário.
-   - Os dados são retornados ao cliente.
-
----
-
-## Diagramas
-
-- **Arquitetura em Camadas:**
-  - Inclui API, serviço e banco de dados com integrações claras.
-- **Fluxo de Dados:**
-  - Mostra o caminho dos dados desde a solicitação do cliente até a resposta.
-
-Os diagramas podem ser encontrados no diretório `/diagrams`.
+- **Desacoplamento:** Camadas separadas permitem atualizações independentes.
+- **Tecnologia de Banco de Dados:** PostgreSQL escolhido pela flexibilidade e desempenho em dados semi-estruturados.
+- **Orquestração:** Kubernetes garante resiliência e escalabilidade.
 
 ---
 
@@ -97,83 +52,49 @@ Os diagramas podem ser encontrados no diretório `/diagrams`.
 
 - PostgreSQL configurado com recursos otimizados (memória e conexões) para suportar grandes volumes.
 
-**Caching:**
-
-- Implementar Redis para reduzir carga em consultas frequentes.
-
----
-
-## Decisões Arquiteturais
-
-- **Desacoplamento:** Camadas separadas permitem atualizações independentes.
-- **Tecnologia de Banco de Dados:** PostgreSQL escolhido pela flexibilidade e desempenho em dados semi-estruturados.
-- **Orquestração:** Kubernetes garante resiliência e escalabilidade.
-
 ---
 
 ## Estrutura do Projeto
 
+```
 src/
-├── common/                                   # Elementos reutilizáveis e utilitários
-│   ├── dto/                                  # DTOs compartilhados
-│   │   └── kafka-response.dto.ts             # Resposta padrão para Kafka
-│   ├── enum/                                 # Enums compartilhados
-│   │   ├── kafka-topics.enum.ts              # Tópicos Kafka padronizados
-│   │   ├── logging-index.enum.ts             # Enum para índices de logging
-│   │   └── user-role.enum.ts                 # Enum para tipos de usuário
-│   ├── filters/                              # Filtros globais
-│   │   └── http-exception.filter.ts          # Filtro para exceções HTTP
-│   ├── interceptors/                         # Interceptadores globais
-│   │   ├── logging/                          # Interceptadores de logging
-│   │   │   ├── logging.interceptor.ts        # Interceptador de logging
-│   │   │   └── logging.interceptor.spec.ts   # Testes
-│   │   ├── request/                          # Interceptadores de requisição
-│   │   │   ├── request.interceptor.ts        # Inspeciona requisições
-│   │   │   └── request.interceptor.spec.ts   # Testes
-│   ├── interfaces/                           # Interfaces compartilhadas
-│   │   └── kafka-response.interface.ts       # Interface para respostas Kafka
-│   ├── middleware/                           # Middlewares globais
-│   │   └── inspect-request.middleware.ts     # Middleware de inspeção de requests
-├── i18n/                                     # Internacionalização
-│   ├── en_US/                                # Traduções em inglês (EUA)
-│   ├── es_ES/                                # Traduções em espanhol
-│   └── pt_BR/                                # Traduções em português
-├── prisma/                                   # Configuração e conexão com banco de dados
-│   ├── prisma.module.ts                      # Módulo do Prisma
-│   ├── prisma.service.ts                     # Serviço do Prisma
-│   └── schema.prisma                         # Esquema do Prisma (opcional)
-├── resources/                                # Recursos organizados por domínio
-│   ├── logging/                              # Domínio de logging
-│   │   ├── dto/                              # DTOs específicos para logging
-│   │   │   ├── create-logging.dto.ts
-│   │   │   └── update-logging.dto.ts
-│   │   ├── entities/                         # Entidades do domínio
-│   │   │   └── logging.entity.ts
-│   │   ├── logging.controller.ts             # Controlador para API REST
-│   │   ├── logging.service.ts                # Serviço para lógica de negócios
-│   │   └── logging.module.ts                 # Módulo de logging
-│   ├── monitoring/                           # Domínio de monitoramento
-│   │   ├── monitoring.controller.ts          # Controlador de monitoramento
-│   │   ├── monitoring.service.ts             # Serviço de monitoramento
-│   │   └── monitoring.module.ts              # Módulo de monitoramento
-│   ├── user/                                 # Domínio de usuários
-│   │   ├── dto/                              # DTOs específicos para usuários
-│   │   │   ├── create-user.dto.ts
-│   │   │   └── update-user.dto.ts
-│   │   ├── entities/                         # Entidades do domínio
-│   │   │   └── user.entity.ts
-│   │   ├── user.controller.ts                # API REST para gerenciamento de usuários
-│   │   ├── user-kafka-consumer.controller.ts # Consumidor Kafka para usuários
-│   │   ├── user.service.ts                   # Serviço de lógica para usuários
-│   │   └── user.module.ts                    # Módulo de usuários
-├── validations/                              # Validações e schemas
-│   ├── app.module.ts                         # Configuração do módulo principal
-│   ├── main.api.ts                           # Ponto de entrada para API REST
-│   └── main.microservice.ts                  # Ponto de entrada para microserviço Kafka Consumer
-├── test/                                     # Testes globais
+├── common/                       # Utilitários compartilhados
+│   ├── dto/                      # Objetos de Transferência de Dados
+│   ├── enum/                     # Enumerações
+│   ├── filters/                  # Filtros de exceção
+│   ├── interceptors/             # Interceptores de logging e requisições
+│   ├── interfaces/               # Interfaces compartilhadas
+│   ├── middleware/               # Componentes middleware
+├── prisma/                       # Configuração do banco de dados
+│   ├── prisma.module.ts          # Módulo Prisma
+│   ├── prisma.service.ts         # Serviço Prisma
+│   └── schema.prisma             # Esquema Prisma
+├── resources/                    # Módulos específicos de funcionalidades
+│   ├── user/                     # Módulo de usuários
+│   ├── logging/                  # Módulo de logging
+│   └── monitoring/               # Módulo de monitoramento
+├── validations/                  # Lógica de validação
+├── main.ts                       # Ponto de entrada da aplicação
+├── microservice.ts               # Ponto de entrada do microserviço
+```
+
+---
+
+## Fluxo de Comunicação
+
+### API REST
+A aplicação expõe endpoints RESTful para gerenciamento de usuários e monitoramento do sistema. Os controladores na pasta `resources` lidam com as requisições HTTP e as encaminham para os serviços correspondentes.
+
+### Eventos Kafka
+O arquivo `user-kafka-consumer.controller.ts` lida com eventos Kafka, como criação e atualização de usuários, permitindo o processamento em tempo real e integração com outros sistemas.
+
+---
+
+## Arquitetura de Implantação
+A aplicação é containerizada usando Docker e orquestrada com Kubernetes para escalabilidade. Consulte `deployment.md` para etapas detalhadas de implantação.
 
 ---
 
 ## Considerações Finais
 
-Esta arquitetura garante desempenho, manutenção e escalabilidade. Pode ser adaptada para incluir tecnologias como mensageria (RabbitMQ/Kafka) e monitoramento (Prometheus/Grafana).
+Esta arquitetura garante desempenho, manutenção e escalabilidade. Pode ser adaptada para incluir tecnologias como monitoramento (Prometheus/Grafana).
