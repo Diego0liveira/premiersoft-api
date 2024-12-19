@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { I18nService } from 'nestjs-i18n';
-import { LoggingIndex } from 'src/resources/logging/entities/logging-index.enum';
+import { LoggingIndex } from 'src/common/enum/logging-index.enum';
 import { LoggingService } from 'src/resources/logging/logging.service';
 
 @Catch()

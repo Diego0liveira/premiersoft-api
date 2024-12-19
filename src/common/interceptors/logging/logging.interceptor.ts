@@ -1,6 +1,6 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
-import { LoggingIndex } from 'src/resources/logging/entities/logging-index.enum';
+import { LoggingIndex } from 'src/common/enum/logging-index.enum';
 import { LoggingService } from 'src/resources/logging/logging.service';
 
 @Injectable()

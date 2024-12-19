@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { LoggingIndex } from './entities/logging-index.enum';
+import { LoggingIndex } from '../../common/enum/logging-index.enum';
 import { LoggingService } from './logging.service';
 
 describe('LoggingService', () => {

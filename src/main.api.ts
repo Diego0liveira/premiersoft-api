@@ -6,8 +6,8 @@ import {
   I18nValidationExceptionFilter,
 } from 'nestjs-i18n';
 import { AppModule } from './app.module';
-import { LoggingInterceptor } from './interceptors/logging/logging.interceptor';
-import { RequestInterceptor } from './interceptors/request/request.interceptor';
+import { LoggingInterceptor } from './common/interceptors/logging/logging.interceptor';
+import { RequestInterceptor } from './common/interceptors/request/request.interceptor';
 import { LoggingService } from './resources/logging/logging.service';
 
 async function bootstrap() {
@@ -34,6 +34,11 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggingInterceptor(loggingService));
   app.useGlobalInterceptors(new RequestInterceptor());
   app.useLogger(['log', 'debug', 'error', 'warn']);
-  await app.listen(3000);
+
+  const PORT = process.env.PORT || 3000;
+
+  console.log(`API REST is running  on port ${PORT}...`);
+
+  await app.listen(PORT);
 }
 bootstrap();

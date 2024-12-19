@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { UserRole } from '../../../common/enum/user-role.enum';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { UserRole } from '../entities/user-role.enum';
 import { UserController } from '../user.controller';
 import { UserService } from '../user.service';
 

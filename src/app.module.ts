@@ -10,11 +10,9 @@ import {
   I18nModule,
 } from 'nestjs-i18n';
 import * as path from 'path';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { HttpExceptionFilter } from './filters/http-exception/http-exception.filter';
-import { RequestInterceptor } from './interceptors/request/request.interceptor';
-import { InspectRequestMiddleware } from './middleware/inspect-request/inspect-request.middleware';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { RequestInterceptor } from './common/interceptors/request/request.interceptor';
+import { InspectRequestMiddleware } from './common/middleware/inspect-request/inspect-request.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { PrismaService } from './prisma/prisma.service';
 import { LoggingModule } from './resources/logging/logging.module';
@@ -63,9 +61,7 @@ export const IS_PROD = process.env.NODE_ENV === 'production';
     LoggingModule,
     MonitoringModule,
   ],
-  controllers: [AppController],
   providers: [
-    AppService,
     PrismaService,
     {
       provide: APP_INTERCEPTOR,

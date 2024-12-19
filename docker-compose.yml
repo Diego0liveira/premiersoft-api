@@ -15,17 +15,60 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/user_management
       - ELASTICSEARCH_NODE=http://elasticsearch:9200
       - ELASTICSEARCH_USERNAME=elastic
       - ELASTICSEARCH_PASSWORD=elastic_password_123
     depends_on:
+      - microservice
       - postgres
       - elasticsearch
     networks:
       - app_network
+
+  microservice:
+    build:
+      context: .
+    container_name: nest_microservice
+    ports:
+      - '3001:3001'
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/user_management
+      ELASTICSEARCH_NODE: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: elastic_password_123
+    depends_on:
+      - postgres
+      - elasticsearch
+    networks:
+      - app_network
+    restart: unless-stopped
+    command: ['node', 'dist/microservice.js']
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.1
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - '2181:2181'
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.1
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+    ports:
+      - '9092:9092'
 
   postgres:
     image: postgres:latest
@@ -36,20 +79,20 @@ services:
       POSTGRES_DB: user_management
       PGDATA: /data/postgres
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/data/postgres
     networks:
       - app_network
     restart: unless-stopped
-  
+
   pgadmin:
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: diegoluiz46@gmail.com
       PGADMIN_DEFAULT_PASSWORD: postgres
     ports:
-      - "8081:80"
+      - '8081:80'
     depends_on:
       - postgres
     networks:
@@ -61,7 +104,7 @@ services:
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - 'ES_JAVA_OPTS=-Xms1g -Xmx1g'
       - ELASTIC_PASSWORD=elastic_password_123
       - xpack.security.enabled=true
     ulimits:
@@ -69,14 +112,18 @@ services:
         soft: -1
         hard: -1
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - '9200:9200'
+      - '9300:9300'
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     networks:
       - app_network
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail -u 'elastic:elastic_password_123' http://localhost:9200 || exit 1"]
+      test:
+        [
+          'CMD-SHELL',
+          "curl --fail -u 'elastic:elastic_password_123' http://localhost:9200 || exit 1",
+        ]
       interval: 10s
       retries: 5
 
@@ -84,12 +131,12 @@ services:
     image: kibana:8.10.2
     container_name: kibana
     ports:
-      - "5601:5601"
+      - '5601:5601'
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - ELASTICSEARCH_USERNAME=kibana_system
       - ELASTICSEARCH_PASSWORD=VvxccUl0pXFio4fsLDUw
-      
+
     depends_on:
       - elasticsearch
     networks:

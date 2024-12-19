@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
 import { EmailExist } from 'src/validations/page-name-exist';
-import { UserRole } from '../entities/user-role.enum';
+import { UserRole } from '../../../common/enum/user-role.enum';
 import { User } from '../entities/user.entity';
 
 export class CreateUserDto extends OmitType(User, [] as const) {

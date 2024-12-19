@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LoggingIndex } from '../logging/entities/logging-index.enum';
+import { LoggingIndex } from '../../common/enum/logging-index.enum';
 import { LoggingService } from '../logging/logging.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';

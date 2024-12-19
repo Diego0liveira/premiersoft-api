@@ -1,9 +1,9 @@
 
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UserRole } from '../../../common/enum/user-role.enum';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { UserRole } from '../entities/user-role.enum';
 import { UserService } from '../user.service';
 
 describe('UserService', () => {
