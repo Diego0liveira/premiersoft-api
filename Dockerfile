@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 
 # Copiar arquivos de dependências e instalar dependências
 COPY package*.json ./
-RUN npm install
+RUN npm install --force
 
 # Copiar Prisma schema e gerar Prisma Client
 COPY prisma ./prisma

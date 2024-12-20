@@ -1,87 +1,11 @@
 version: '3.3'
 
+
 networks:
   app_network:
     driver: bridge
 
 services:
-  nestjs:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nestjs
-    working_dir: /usr/src/app
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
-    ports:
-      - '3000:3000'
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - ELASTICSEARCH_NODE=${ELASTICSEARCH_NODE}
-      - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}
-      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD}
-    depends_on:
-      - microservice
-      - postgres
-      - elasticsearch
-      - redis
-    networks:
-      - app_network
-
-  microservice:
-    build:
-      context: .
-    container_name: nest_microservice
-    ports:
-      - '3001:3001'
-    environment:
-      NODE_ENV: ${NODE_ENV}
-      DATABASE_URL: ${DATABASE_URL}
-      ELASTICSEARCH_NODE: ${ELASTICSEARCH_NODE}
-      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME}
-      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
-    depends_on:
-      - postgres
-      - elasticsearch
-      - redis
-    networks:
-      - app_network
-    restart: unless-stopped
-    command: ['node', 'dist/microservice.js']
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.4.1
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - '2181:2181'
-
-  kafka:
-    image: confluentinc/cp-kafka:7.4.1
-    container_name: kafka
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-    ports:
-      - '9092:9092'
-
-  redis:
-    image: redis:alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
-    networks:
-      - app_network
-
   postgres:
     image: postgres:latest
     container_name: postgres
@@ -97,19 +21,13 @@ services:
     networks:
       - app_network
     restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME} -d ${DB_NAME}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-    ports:
-      - '8081:80'
-    depends_on:
-      - postgres
-    networks:
-      - app_network
-
+     
   elasticsearch:
     image: elasticsearch:8.10.2
     container_name: elasticsearch
@@ -128,26 +46,18 @@ services:
       - '9300:9300'
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
-    entrypoint: >
-      /bin/bash -c "
-      echo 'Iniciando Elasticsearch...';
-      /usr/local/bin/docker-entrypoint.sh;
-      sleep 10;
-      echo 'Redefinindo senha do usuário kibana_system...';
-      bin/elasticsearch-reset-password -u kibana_system --batch --silent > /usr/share/elasticsearch/reset-password.log;
-      cat /usr/share/elasticsearch/reset-password.log;
-      exec /usr/local/bin/docker-entrypoint.sh
-      "
     networks:
       - app_network
     healthcheck:
       test:
         [
           'CMD-SHELL',
-          "curl --fail -u 'elastic:elastic_password_123' http://localhost:9200 || exit 1",
+          'curl -s http://localhost:9200/_cluster/health | grep -vq ''"status":"red"''',
         ]
       interval: 10s
+      timeout: 5s
       retries: 5
+
 
   kibana:
     image: kibana:8.10.2
@@ -157,21 +67,102 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_NODE}
       - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=0C1WD8SAdPKlNF1jmd*m
-    entrypoint: >
-      /bin/bash -c "
-      echo 'Aguardando Elasticsearch...';
-      until curl -s -u elastic:elastic_password_123 http://elasticsearch:9200 -o /dev/null; do sleep 3; done;
-      echo 'Elasticsearch está pronto!';
-      exec kibana
-      "
+      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD}
     depends_on:
       - elasticsearch
     networks:
       - app_network
 
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - '6379:6379'
+    networks:
+      - app_network
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.1
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - '2181:2181'
+    networks:
+      - app_network
+    healthcheck:
+      test: ['CMD-SHELL', 'echo srvr | nc localhost 2181 || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.1
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+    volumes:
+      - kafka-logs:/var/lib/kafka/data
+    networks:
+      - app_network
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'kafka-topics --bootstrap-server localhost:9092 --list']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+  nestjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nestjs
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - '3001:3001'
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - ELASTICSEARCH_NODE=${ELASTICSEARCH_NODE}
+      - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}
+      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD}
+    depends_on:
+      - postgres
+      - elasticsearch
+      - redis
+      - kafka
+    networks:
+      - app_network
+
+
 volumes:
   postgres_data:
     driver: local
   elasticsearch_data:
+    driver: local
+  kafka-logs:
     driver: local

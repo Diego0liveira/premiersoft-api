@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as dotenv from 'dotenv';
 import {
   i18nValidationErrorFactory,
   I18nValidationExceptionFilter,
@@ -11,6 +12,9 @@ import { RequestInterceptor } from './common/interceptors/request/request.interc
 import { LoggingService } from './resources/logging/logging.service';
 
 async function bootstrap() {
+
+  dotenv.config();
+  
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
@@ -35,7 +39,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new RequestInterceptor());
   app.useLogger(['log', 'debug', 'error', 'warn']);
 
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.API_PORT || 3001;
 
   console.log(`API REST is running  on port ${PORT}...`);
 

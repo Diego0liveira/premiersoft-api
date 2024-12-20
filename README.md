@@ -18,15 +18,14 @@ Este projeto implementa um sistema backend robusto usando **NestJS** que oferece
 9. **REST API**: Endpoints RESTful para gerenciar recursos, como usuários.
 10. **Cache com Redis**: Redução da carga em consultas frequentes usando Redis como camada de cache.
 11. **PostgreSQL**: Escolhido pela combinação de consistência, escalabilidade e suporte às consultas relacionais.
-12. **Validação de Dados**: Utiliza-se bibliotecas como `class-validator` para validar entradas de forma eficiente
-
+12. **Validação de Dados**: Utiliza-se bibliotecas como class-validator para validar entradas de forma eficiente
 
 O design considera desempenho (tempo de resposta de até 500ms), escalabilidade para bilhões de registros e alta disponibilidade.
 
 ---
 
 ## Estrutura do Projeto
-```plaintext
+```
 src/
 ├── common/                       # Utilitários compartilhados
 │   ├── dto/                      # Objetos de Transferência de Dados
@@ -52,16 +51,16 @@ src/
 
 ## 🚀 Tecnologias Utilizadas
 
-- [NestJS](https://nestjs.com/)
-- [Prisma ORM](https://www.prisma.io/)
-- [PostgreSQL](https://www.postgresql.org/)
-- [Docker](https://www.docker.com/)
-- [Elasticsearch](https://www.elastic.co/elasticsearch/)
-- [Swagger](https://swagger.io/)
-- [Kubernetes](https://kubernetes.io/docs/)
-- [Codecov](https://docs.codecov.com/docs)
-- [Redis](https://redis.io/)
-- [Kafka](https://kafka.apache.org/)
+- ![NestJS](https://img.icons8.com/color/48/nestjs.png) **NestJS**
+- ![Prisma ORM](https://img.icons8.com/color/48/prisma.png) **Prisma ORM**
+- ![PostgreSQL](https://img.icons8.com/fluency/48/postgresql.png) **PostgreSQL**
+- ![Docker](https://img.icons8.com/fluency/48/docker.png) **Docker**
+- ![Elasticsearch](https://img.icons8.com/color/48/elasticsearch.png) **Elasticsearch**
+- ![Swagger](https://img.icons8.com/color/48/swagger.png) **Swagger**
+- ![Kubernetes](https://img.icons8.com/color/48/kubernetes.png) **Kubernetes**
+- ![Codecov](https://img.icons8.com/color/48/codecov.png) **Codecov**
+- ![Redis](https://img.icons8.com/color/48/redis.png) **Redis**
+- ![Kafka](https://img.icons8.com/fluency/48/kafka.png) **Kafka**
 
 ---
 
@@ -80,7 +79,7 @@ Certifique-se de ter os seguintes componentes instalados:
 ### Usuários
 
 - **Criar usuário**:
-  - Endpoint: `POST /users`
+  - Endpoint: POST /users
   - Corpo:
     ```json
     {
@@ -91,13 +90,13 @@ Certifique-se de ter os seguintes componentes instalados:
     ```
 
 - **Listar todos os usuários**:
-  - Endpoint: `GET /users`
+  - Endpoint: GET /users
 
 - **Buscar usuário por ID**:
-  - Endpoint: `GET /users/:id`
+  - Endpoint: GET /users/:id
 
 - **Atualizar usuário**:
-  - Endpoint: `PUT /users/:id`
+  - Endpoint: PUT /users/:id
   - Corpo:
     ```json
     {
@@ -107,7 +106,54 @@ Certifique-se de ter os seguintes componentes instalados:
     ```
 
 - **Filtrar usuários por campo**:
-  - Endpoint: `GET /users/filter?field=email&value=john.doe@example.com`
+  - Endpoint: GET /users/filter?field=email&value=john.doe@example.com
+
+### Kafka Consumer
+
+- **Criar usuário via Kafka**:
+  - Evento Kafka: `USER_CREATED`
+  - Corpo da mensagem:
+    ```json
+    {
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "role": "admin"
+    }
+    ```
+
+- **Atualizar usuário via Kafka**:
+  - Evento Kafka: `USER_UPDATED`
+  - Corpo da mensagem:
+    ```json
+    {
+      "id": 1,
+      "name": "John Updated",
+      "email": "john.updated@example.com",
+      "role": "client"
+    }
+    ```
+
+- **Obter todos os usuários via Kafka**:
+  - Evento Kafka: `GET_USERS`
+  - Retorno: Lista de usuários.
+
+- **Buscar usuário por ID via Kafka**:
+  - Evento Kafka: `GET_USER`
+  - Corpo da mensagem:
+    ```json
+    {
+      "id": 1
+    }
+    ```
+
+- **Deletar usuário via Kafka**:
+  - Evento Kafka: `USER_DELETED`
+  - Corpo da mensagem:
+    ```json
+    {
+      "id": 1
+    }
+    ```
 
 ### Logs
 
@@ -119,7 +165,7 @@ Certifique-se de ter os seguintes componentes instalados:
 ### Monitoramento
 
 - **Health Check**:
-  - Endpoint: `GET /health`
+  - Endpoint: GET /health
   - Retorna o status do banco de dados e outros serviços.
 
 ### 📚 Documentação com Swagger
@@ -133,7 +179,7 @@ Certifique-se de ter os seguintes componentes instalados:
 
 ### 🌐 Variáveis de Ambiente
 
-As variáveis de ambiente necessárias estão listadas no arquivo `.env.example`. Copie este arquivo para `.env` e preencha as informações adequadas:
+As variáveis de ambiente necessárias estão listadas no arquivo .env.example. Copie este arquivo para .env e preencha as informações adequadas:
 
 ```env
 DATABASE_URL=postgresql://<usuario>:<senha>@localhost:5432/<banco>
@@ -198,8 +244,8 @@ npm run test:e2e
 ```
 
 ![Coverage](https://codecov.io/gh/<USERNAME>/<REPOSITORY>/branch/main/graph/badge.svg)
----
 
+---
 
 ## 🤝 Contribuições
 
