@@ -67,7 +67,7 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_NODE}
       - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD}
+      - ELASTICSEARCH_PASSWORD=u8gE3E0fpK99pZVv55Ue
     depends_on:
       - elasticsearch
     networks:
@@ -97,6 +97,8 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - '2181:2181'
+    volumes:
+      - ./zookeeper-data:/data
     networks:
       - app_network
     healthcheck:
@@ -114,15 +116,12 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     ports:
       - '9092:9092'
-      - '29092:29092'
     volumes:
       - kafka-logs:/var/lib/kafka/data
     networks:
@@ -157,6 +156,33 @@ services:
       - kafka
     networks:
       - app_network
+
+
+  microservice:
+    build:
+      context: .
+    container_name: nest_microservice
+    ports:
+      - '3002:3002'
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      DATABASE_URL: ${DATABASE_URL}
+      ELASTICSEARCH_NODE: ${ELASTICSEARCH_NODE}
+      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      KAFKA_BROKERS: ${KAFKA_BROKER}
+    depends_on:
+      - kafka
+      - zookeeper
+      - postgres
+      - elasticsearch
+      - redis
+    networks:
+      - app_network
+    restart: unless-stopped
+    command: ['node', 'dist/microservice.js']
 
 
 volumes:

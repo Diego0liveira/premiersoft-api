@@ -43,31 +43,6 @@ export const IS_PROD = process.env.NODE_ENV === 'production';
         AcceptLanguageResolver,
       ],
     }),
-    /*
-    CacheModule.registerAsync({
-      useFactory: async (configService: ConfigService) => {
-        const store = await redisStore({
-          socket: {
-            host: configService.get('REDIS_HOST'),
-            port: configService.get('REDIS_PORT'),
-          },
-        });
-
-        return {
-          isGlobal: true,
-          store: store as unknown as CacheStore,
-          ttl: configService.get('CACHE_TTL'),
-        };
-      },
-    }),
-  
-    CacheModule.register({
-      isGlobal: true,
-      host: process.env.REDIS_HOST || 'redis',
-      port: parseInt(process.env.REDIS_PORT, 10) || 6379,
-      ttl: parseInt(process.env.CACHE_TTL, 10) || 300,
-    }),
-      */
     ElasticsearchModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
